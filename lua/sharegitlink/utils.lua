@@ -109,30 +109,48 @@ function M.show_virtual_text(message, line)
 	})
 end
 
+local function restore_keymapping(mode, key, previous)
+	if previous and previous.lhs ~= "" then
+		vim.keymap.set(mode, key, previous.rhs, {
+			buffer = buf,
+			noremap = previous.noremap == 1,
+			expr = previous.expr == 1,
+			silent = previous.silent == 1,
+			nowait = previous.nowait == 1,
+		})
+	else
+		pcall(vim.keymap.del, mode, key, { buffer = buf })
+	end
+end
+
 function M.open_in_browser(link)
-	vim.keymap.set("n", "<CR>", function()
-		local open_cmd
-		if vim.fn.has("mac") == 1 then
-			open_cmd = { "open", link }
-		elseif vim.fn.has("unix") == 1 then
-			open_cmd = { "xdg-open", link }
-		else
-			vim.notify("Cannot open browser on this OS", vim.log.levels.ERROR)
-			return
-		end
+	local previousn = vim.fn.maparg("<CR>", "n", false, true)
 
-		vim.fn.jobstart(open_cmd, { detach = true })
-		vim.keymap.del("n", "<CR>", { buffer = 0 })
-	end, { buffer = 0, desc = "Open Git link in browser", nowait = true })
+	for _, mode in { "n", "v" } do
+		local previous = vim.fn.maparg("<CR>", "v", false, true)
+		vim.keymap.set(mode, "<CR>", function()
+			local open_cmd
+			if vim.fn.has("mac") == 1 then
+				open_cmd = { "open", link }
+			elseif vim.fn.has("unix") == 1 then
+				open_cmd = { "xdg-open", link }
+			else
+				vim.notify("Cannot open browser on this OS", vim.log.levels.ERROR)
+				return
+			end
 
-	vim.api.nvim_create_autocmd("CursorMoved", {
-		buffer = 0,
-		once = true,
-		callback = function()
-			pcall(vim.keymap.del, "n", "<CR>", { buffer = 0 })
-		end,
-	})
+			vim.fn.jobstart(open_cmd, { detach = true })
+			restore_keymapping(mode, "<CR>", previous)
+		end, { buffer = 0, desc = "Open Git link in browser", nowait = true })
+
+		vim.api.nvim_create_autocmd("CursorMoved", {
+			buffer = 0,
+			once = true,
+			callback = function()
+				restore_keymapping(mode, "<CR>", previous)
+			end,
+		})
+	end
 end
 
 return M
-
