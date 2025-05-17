@@ -126,7 +126,7 @@ end
 function M.open_in_browser(link)
 	local previousn = vim.fn.maparg("<CR>", "n", false, true)
 
-	for _, mode in { "n", "v" } do
+	for _, mode in ipairs({ "n", "v" }) do
 		local previous = vim.fn.maparg("<CR>", "v", false, true)
 		vim.keymap.set(mode, "<CR>", function()
 			local open_cmd
