@@ -1,7 +1,7 @@
 local utils = require("sharegitlink.utils")
 
 local config = {
-	link_builder = nil,
+	link_builder = utils.default_link_builder,
 	display_link = true,
 }
 
