@@ -29,11 +29,7 @@ function ShareGitLink.copy_gitfarm_link()
 	-- Extract project name from remote URL (supports https and ssh)
 	local package_name = utils.extract_repo_path(remote_url)
 	-- local start_line, end_line = get_visual_range()
-	local line_fragment = ""
 	local start_line, end_line = utils.get_visual_range()
-	if not utils.is_directory_buffer() then
-		line_fragment = (start_line == end_line) and ("#L" .. start_line) or ("#L" .. start_line .. "-L" .. end_line)
-	end
 
 	local url = config.link_builder({
 		repo = package_name,
@@ -51,7 +47,7 @@ end
 
 function ShareGitLink.setup(opts)
 	if opts then
-		config.link_builder = opts.link_builde or utils.default_link_builder
+		config.link_builder = opts.link_builder or utils.default_link_builder
 		config.display_link = opts.display_link or true
 	end
 end
