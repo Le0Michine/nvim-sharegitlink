@@ -31,14 +31,15 @@ return {
   branch = "main",
   config = function()
     local sharegitlink = require("sharegitlink")
-    sharegitlink:setup({
+    sharegitlink.setup({
       link_builder = function(opts)
         local url = string.format(
-          "https://my.secret.gitfarm.com/packages/%s/blobs/%s/--/%s%s",
-          opts.package_name,
+          "https://my.secret.gitfarm.com/packages/%s/blobs/%s/--/%s#L%d-L%d",
+          opts.repo,
           opts.commit,
           opts.rel_path,
-          opts.line_fragment
+          opts.start_line,
+          opts.end_line
         )
         return url
       end,
