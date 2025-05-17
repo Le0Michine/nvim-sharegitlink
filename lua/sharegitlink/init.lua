@@ -44,7 +44,7 @@ function ShareGitLink.copy_gitfarm_link()
 	})
 
 	vim.fn.setreg("+", url)
-	print("GitFarm URL copied to clipboard: " .. url)
+	vim.notify("GitFarm URL copied to clipboard: " .. url)
 end
 
 function ShareGitLink.setup(opts)
