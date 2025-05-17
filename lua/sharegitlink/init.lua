@@ -1,4 +1,4 @@
-local utils = require "nvim-sharegitlink.utils"
+local utils = require "sharegitlink.utils"
 
 local config = {
 	link_builder = nil,
