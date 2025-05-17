@@ -109,4 +109,30 @@ function M.show_virtual_text(message, line)
 	})
 end
 
+function M.open_in_browser(link)
+	vim.keymap.set("n", "<CR>", function()
+		local open_cmd
+		if vim.fn.has("mac") == 1 then
+			open_cmd = { "open", link }
+		elseif vim.fn.has("unix") == 1 then
+			open_cmd = { "xdg-open", link }
+		else
+			vim.notify("Cannot open browser on this OS", vim.log.levels.ERROR)
+			return
+		end
+
+		vim.fn.jobstart(open_cmd, { detach = true })
+		vim.keymap.del("n", "<CR>", { buffer = 0 })
+	end, { buffer = 0, desc = "Open Git link in browser", nowait = true })
+
+	vim.api.nvim_create_autocmd("CursorMoved", {
+		buffer = 0,
+		once = true,
+		callback = function()
+			pcall(vim.keymap.del, "n", "<CR>", { buffer = 0 })
+		end,
+	})
+end
+
 return M
+

@@ -3,6 +3,7 @@ local utils = require("sharegitlink.utils")
 local config = {
 	link_builder = utils.default_link_builder,
 	display_link = true,
+	open_link = true,
 }
 
 local ShareGitLink = {}
@@ -43,12 +44,16 @@ function ShareGitLink.copy_gitfarm_link()
 	if config.display_link then
 		utils.show_virtual_text("GitFarm URL copied to clipboard: " .. url, end_line)
 	end
+	if config.open_link then
+		utils.open_in_browser(url)
+	end
 end
 
 function ShareGitLink.setup(opts)
 	if opts then
 		config.link_builder = opts.link_builder or utils.default_link_builder
 		config.display_link = opts.display_link or true
+		config.open_link = opts.open_link or true
 	end
 end
 
