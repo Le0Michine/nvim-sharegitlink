@@ -3,7 +3,7 @@ local utils = require("sharegitlink.utils")
 local config = {
 	link_builder = utils.default_link_builder,
 	display_link = true,
-	open_link = true,
+	open_link = false,
 }
 
 local ShareGitLink = {}
@@ -53,7 +53,7 @@ function ShareGitLink.setup(opts)
 	if opts then
 		config.link_builder = opts.link_builder or utils.default_link_builder
 		config.display_link = opts.display_link or true
-		config.open_link = opts.open_link or true
+		config.open_link = opts.open_link or false
 	end
 end
 
