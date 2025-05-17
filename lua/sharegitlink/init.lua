@@ -1,9 +1,9 @@
-local utils = require "sharegitlink.utils"
+local utils = require("sharegitlink.utils")
 
 local config = {
 	link_builder = nil,
+	display_link = true,
 }
-
 
 local ShareGitLink = {}
 
@@ -44,11 +44,16 @@ function ShareGitLink.copy_gitfarm_link()
 	})
 
 	vim.fn.setreg("+", url)
-	vim.notify("GitFarm URL copied to clipboard: " .. url)
+	if config.display_link then
+		utils.show_virtual_text("GitFarm URL copied to clipboard: " .. url, end_line)
+	end
 end
 
 function ShareGitLink.setup(opts)
-	config.link_builder = opts and opts.link_builde or utils.default_link_builder
+	if opts then
+		config.link_builder = opts.link_builde or utils.default_link_builder
+		config.display_link = opts.display_link or true
+	end
 end
 
 return ShareGitLink

@@ -1,3 +1,5 @@
+local ns_id = vim.api.nvim_create_namespace("mygitlinker")
+
 local M = {}
 
 local function safe_read_command(cmd_args)
@@ -85,6 +87,26 @@ function M.default_link_builder(opts)
 		end
 	end
 	return url
+end
+
+function M.show_virtual_text(message, line)
+	-- Clear old virtual text
+	vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+
+	-- Add virtual text at line (0-indexed)
+	vim.api.nvim_buf_set_extmark(0, ns_id, line - 1, 0, {
+		virt_text = { { "→ " .. message, "Comment" } },
+		virt_text_pos = "eol",
+	})
+
+	-- Set autocmd to remove on cursor move
+	vim.api.nvim_create_autocmd("CursorMoved", {
+		buffer = 0,
+		once = true,
+		callback = function()
+			vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+		end,
+	})
 end
 
 return M
