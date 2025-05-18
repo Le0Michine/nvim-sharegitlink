@@ -82,7 +82,7 @@ function M.default_link_builder(opts)
 	if opts.end_line then
 		if opts.end_line ~= opts.start_line then
 			url = url .. string.format("#L%d-L%d", opts.start_line, opts.end_line)
-    else
+		else
 			url = url .. string.format("#L%d", opts.start_line)
 		end
 	end
@@ -95,8 +95,8 @@ function M.show_virtual_text(message, line)
 
 	-- Add virtual text at line (0-indexed)
 	vim.api.nvim_buf_set_extmark(0, ns_id, line - 1, 0, {
-		virt_text = { { "→ " .. message, "Comment" } },
-		virt_text_pos = "eol",
+		virt_lines = { { { "→ " .. message, "Comment" } } },
+		virt_lines_above = false,
 	})
 
 	-- Set autocmd to remove on cursor move
