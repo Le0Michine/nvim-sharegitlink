@@ -79,10 +79,10 @@ end
 
 function M.default_link_builder(opts)
 	local url = string.format("https://github.com/%s/blob/%s/%s", opts.repo, opts.commit, opts.rel_path)
-	if opts.start_line then
-		if opts.end_line and opts.end_line ~= opts.start_line then
+	if opts.end_line then
+		if opts.end_line ~= opts.start_line then
 			url = url .. string.format("#L%d-L%d", opts.start_line, opts.end_line)
-		else
+    else
 			url = url .. string.format("#L%d", opts.start_line)
 		end
 	end

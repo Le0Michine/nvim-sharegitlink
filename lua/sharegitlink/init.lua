@@ -1,11 +1,11 @@
 local utils = require("sharegitlink.utils")
 
 --- @class LinkBuilderOptions
---- @field repo string         Repository name, might include "/"
---- @field commit string       Current commit hash
---- @field rel_path string     Relative path to the file
---- @field start_line number   First selected line number
---- @field end_line number     Last selected line number, could be the same as start_line
+--- @field repo string              Repository name, might include "/"
+--- @field commit string            Current commit hash
+--- @field rel_path string          Relative path to the file
+--- @field start_line number        First selected line number
+--- @field end_line number|nil      Last selected line number, could be the same as start_line
 
 --- @class ShareGitLinkConfig
 --- @field link_builder fun(opts: LinkBuilderOptions): string   Overrides link building behavior, gets details about repo, commit, rel_path and line numbers then returns a link as string. Default builder produces GitHub links.
@@ -44,14 +44,24 @@ function ShareGitLink.get_gitfarm_link()
 	-- local start_line, end_line = get_visual_range()
 	local start_line, end_line = utils.get_visual_range()
 
-	local url = config.link_builder({
-		repo = package_name,
-		commit = commit,
-		rel_path = rel_path,
-		start_line = start_line,
-		end_line = end_line,
-	})
-
+  local url
+	if utils.is_directory_buffer() then
+		url = config.link_builder({
+			repo = package_name,
+			commit = commit,
+			rel_path = rel_path,
+			start_line = 0,
+			end_line = nil,
+		})
+	else
+		url = config.link_builder({
+			repo = package_name,
+			commit = commit,
+			rel_path = rel_path,
+			start_line = start_line,
+			end_line = end_line,
+		})
+	end
 	return url
 end
 
