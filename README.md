@@ -1,6 +1,6 @@
 # ShareGitLink
 
-Lazy install, works with GH by default
+Lazy install, works with GitHub by default
 
 ```lua
 return {
@@ -19,6 +19,25 @@ end, { noremap = true, silent = true })
 vim.keymap.set("v", "<leader>gf", function()
   require("sharegitlink").copy_gitfarm_link()
 end, { noremap = true, silent = true })
+```
+
+alternative remap configuration
+
+```lua
+return {
+  "Le0Michine/nvim-sharegitlink",
+  branch = "main",
+  keys = {
+    {
+      "<leader>gf",
+      function()
+        require("sharegitlink").copy_gitfarm_link()
+      end,
+      mode = { "n", "v" },
+      desc = "Copy Link",
+    },
+  },
+}
 ```
 
 ## Additional configuration
