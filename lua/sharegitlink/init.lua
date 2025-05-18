@@ -1,6 +1,6 @@
 local utils = require("sharegitlink.utils")
 
---- @class LinkBuildeOptions
+--- @class LinkBuilderOptions
 --- @field repo string         Repository name, might include "/"
 --- @field commit string       Current commit hash
 --- @field rel_path string     Relative path to the file
@@ -8,9 +8,8 @@ local utils = require("sharegitlink.utils")
 --- @field end_line number     Last selected line number, could be the same as start_line
 
 --- @class ShareGitLinkConfig
---- @field link_builder fun(opts: LinkBuildeOptions): string   Overrides link building behaviour, gets details about repo, commit, rel_path and line numbers then returns a link as string. Default builder produces GitHub links.
+--- @field link_builder fun(opts: LinkBuilderOptions): string   Overrides link building behavior, gets details about repo, commit, rel_path and line numbers then returns a link as string. Default builder produces GitHub links.
 --- @field display_link boolean                                When true generated link will appear as virtual text in the last selected line (default: true)
---- @field open_link boolean                                   When true the plugin will listen for the first keypress on "g" to open the link in the default browser (default: false)
 
 --- @type ShareGitLinkConfig
 local config = {
@@ -21,7 +20,7 @@ local config = {
 
 local ShareGitLink = {}
 
-function ShareGitLink.copy_gitfarm_link()
+function ShareGitLink.get_gitfarm_link()
 	local target_path
 	if utils.is_directory_buffer() then
 		-- Tree mode: resolve path under cursor
@@ -53,13 +52,24 @@ function ShareGitLink.copy_gitfarm_link()
 		end_line = end_line,
 	})
 
+	return url
+end
+
+function ShareGitLink.copy_gitfarm_link()
+	local url = ShareGitLink.get_gitfarm_link()
+	local _, end_line = utils.get_visual_range()
+
 	vim.fn.setreg("+", url)
+
 	if config.display_link then
 		utils.show_virtual_text("GitFarm URL copied to clipboard: " .. url, end_line)
 	end
-	if config.open_link then
-		utils.open_in_browser(url)
-	end
+end
+
+function ShareGitLink.open_gitfarm_link()
+	local url = ShareGitLink.get_gitfarm_link()
+
+	utils.open_in_browser(url)
 end
 
 --- Setup ShareGitLink plugin
@@ -68,13 +78,11 @@ end
 --- require("sharegitlink").setup({
 ---  link_builder = function(opts) return "https://..." end
 ---  display_link = true,
----  open_link = true,
 --- })
 function ShareGitLink.setup(opts)
 	if opts then
 		config.link_builder = opts.link_builder or utils.default_link_builder
 		config.display_link = opts.display_link or true
-		config.open_link = opts.open_link or false
 	end
 end
 

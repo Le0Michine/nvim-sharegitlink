@@ -12,12 +12,20 @@ return {
 ## Remaps for grabbing git link
 
 ```lua
-vim.keymap.set("n", "<leader>gf", function()
+vim.keymap.set("n", "<leader>gc", function()
   require("sharegitlink").copy_gitfarm_link()
 end, { noremap = true, silent = true })
 
-vim.keymap.set("v", "<leader>gf", function()
+vim.keymap.set("v", "<leader>gc", function()
   require("sharegitlink").copy_gitfarm_link()
+end, { noremap = true, silent = true })
+
+vim.keymap.set("n", "<leader>go", function()
+  require("sharegitlink").open_gitfarm_link()
+end, { noremap = true, silent = true })
+
+vim.keymap.set("v", "<leader>go", function()
+  require("sharegitlink").open_gitfarm_link()
 end, { noremap = true, silent = true })
 ```
 
@@ -29,12 +37,20 @@ return {
   branch = "main",
   keys = {
     {
-      "<leader>gf",
+      "<leader>gc",
       function()
         require("sharegitlink").copy_gitfarm_link()
       end,
       mode = { "n", "v" },
       desc = "Copy Link",
+    },
+    {
+      "<leader>go",
+      function()
+        require("sharegitlink").open_gitfarm_link()
+      end,
+      mode = { "n", "v" },
+      desc = "Open Link",
     },
   },
 }
