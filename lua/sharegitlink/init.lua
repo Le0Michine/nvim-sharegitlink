@@ -15,11 +15,11 @@ local utils = require("sharegitlink.utils")
 local config = {
 	link_builder = utils.default_link_builder,
 	display_link = true,
-	open_link = false,
 }
 
 local ShareGitLink = {}
 
+--- Generates link for current buffer in gitfarm
 function ShareGitLink.get_gitfarm_link()
 	local target_path
 	if utils.is_directory_buffer() then
@@ -55,6 +55,7 @@ function ShareGitLink.get_gitfarm_link()
 	return url
 end
 
+--- Generates link for current buffer in gitfarm and copies it into clipboard
 function ShareGitLink.copy_gitfarm_link()
 	local url = ShareGitLink.get_gitfarm_link()
 	local _, end_line = utils.get_visual_range()
@@ -66,6 +67,7 @@ function ShareGitLink.copy_gitfarm_link()
 	end
 end
 
+--- Generates and opens link for current buffer in gitfarm
 function ShareGitLink.open_gitfarm_link()
 	local url = ShareGitLink.get_gitfarm_link()
 
