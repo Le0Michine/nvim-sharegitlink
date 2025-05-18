@@ -109,28 +109,11 @@ function M.show_virtual_text(message, line)
 	})
 end
 
-local function restore_keymapping(mode, key, previous)
-	if previous and previous.rhs and previous.rhs ~= "" then
-		vim.keymap.set(mode, key, previous.rhs, {
-			buffer = 0,
-			noremap = previous.noremap == 1,
-			expr = previous.expr == 1,
-			silent = previous.silent == 1,
-			nowait = previous.nowait == 1,
-		})
-	else
-		local ok = pcall(vim.keymap.del, mode, key, { buffer = 0 })
-		if not ok then
-			vim.notify("Failed to clear key mapping for " .. mode .. ":" .. key)
-		end
-	end
-end
-
 function M.open_in_browser(link)
 	local open_link_key = "g"
-	for _, mode in ipairs({ "n", "v" }) do
-		local previous = vim.fn.maparg(open_link_key, "v", false, true)
-		vim.keymap.set(mode, open_link_key, function()
+	local key_handler
+	key_handler = vim.on_key(function(char)
+		if char == open_link_key then
 			local open_cmd
 			if vim.fn.has("mac") == 1 then
 				open_cmd = { "open", link }
@@ -142,17 +125,18 @@ function M.open_in_browser(link)
 			end
 
 			vim.fn.jobstart(open_cmd, { detach = true })
-			restore_keymapping(mode, open_link_key, previous)
-		end, { buffer = 0, desc = "Open Git link in browser", nowait = true })
 
-		vim.api.nvim_create_autocmd("CursorMoved", {
-			buffer = 0,
-			once = true,
-			callback = function()
-				restore_keymapping(mode, open_link_key, previous)
-			end,
-		})
-	end
+			vim.on_key(nil, key_handler)
+		end
+	end, vim.api.nvim_get_current_buf())
+
+	vim.api.nvim_create_autocmd("CursorMoved", {
+		buffer = 0,
+		once = true,
+		callback = function()
+			vim.on_key(nil, key_handler)
+		end,
+	})
 end
 
 return M
