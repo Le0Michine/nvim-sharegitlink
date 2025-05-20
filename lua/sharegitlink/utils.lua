@@ -62,22 +62,22 @@ function M.extract_repo_path(remote_url)
 	remote_url = remote_url:gsub("%.git$", "")
 
 	-- SSH format: git@host:owner/repo
-	local ssh_path = remote_url:match("git@[^:]+:(.+)")
+	local ssh_host, ssh_path = remote_url:match("git@([^:]+):(.+)")
 	if ssh_path then
-		return ssh_path
+		return ssh_host, ssh_path
 	end
 
 	-- HTTPS format: https://host/owner/repo
-	local https_path = remote_url:match("https?://[^/]+/(.+)")
+	local https_host, https_path = remote_url:match("https?://([^/]+)/(.+)")
 	if https_path then
-		return https_path
+		return https_host, https_path
 	end
 
 	-- Fallback: just the last segment (best guess)
-	return remote_url:match("([^/]+)$")
+	return remote_url:match("^([^/]+)/"), remote_url:match("([^/]+)$")
 end
 
-function M.default_link_builder(opts)
+function M.github_link_builder(opts)
 	local url = string.format("https://github.com/%s/blob/%s/%s", opts.repo, opts.commit, opts.rel_path)
 	if opts.end_line then
 		if opts.end_line ~= opts.start_line then

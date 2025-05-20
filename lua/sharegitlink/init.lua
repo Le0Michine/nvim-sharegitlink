@@ -1,5 +1,7 @@
 local utils = require("sharegitlink.utils")
 
+--- @alias LinkBuilderFn fun(opts: LinkBuilderOptions): string
+
 --- @class LinkBuilderOptions
 --- @field repo string              Repository name, might include "/"
 --- @field commit string            Current commit hash
@@ -8,12 +10,16 @@ local utils = require("sharegitlink.utils")
 --- @field end_line number|nil      Last selected line number, could be the same as start_line
 
 --- @class ShareGitLinkConfig
---- @field link_builder fun(opts: LinkBuilderOptions): string   Overrides link building behavior, gets details about repo, commit, rel_path and line numbers then returns a link as string. Default builder produces GitHub links.
---- @field display_link boolean                                When true generated link will appear as virtual text in the last selected line (default: true)
+--- @field link_builder table<string,LinkBuilderFn>   Overrides link building behavior, gets details about repo, commit, rel_path and line numbers then returns a link as string. Default builder produces GitHub links.
+--- @field display_link boolean                       When true generated link will appear as virtual text in the last selected line (default: true)
+
+--- @class ShareGitLinkOptions
+--- @field link_builder LinkBuilderFn|table<string,LinkBuilderFn>   Overrides link building behavior, gets details about repo, commit, rel_path and line numbers then returns a link as string. Default builder produces GitHub links.
+--- @field display_link boolean                                     When true generated link will appear as virtual text in the last selected line (default: true)
 
 --- @type ShareGitLinkConfig
 local config = {
-	link_builder = utils.default_link_builder,
+	link_builder = { default = utils.github_link_builder },
 	display_link = true,
 }
 
@@ -40,13 +46,21 @@ function ShareGitLink.get_gitfarm_link()
 	local commit = utils.get_commit_hash() or ""
 
 	-- Extract project name from remote URL (supports https and ssh)
-	local package_name = utils.extract_repo_path(remote_url)
+	local repo_host, package_name = utils.extract_repo_path(remote_url)
 	-- local start_line, end_line = get_visual_range()
 	local start_line, end_line = utils.get_visual_range()
 
-  local url
+	--- @type LinkBuilderFn
+	local link_builder
+	if type(config.link_builder[repo_host]) == "function" then
+		link_builder = config.link_builder[repo_host]
+	else
+		link_builder = config.link_builder["default"]
+	end
+
+	local url
 	if utils.is_directory_buffer() then
-		url = config.link_builder({
+		url = link_builder({
 			repo = package_name,
 			commit = commit,
 			rel_path = rel_path,
@@ -54,7 +68,7 @@ function ShareGitLink.get_gitfarm_link()
 			end_line = nil,
 		})
 	else
-		url = config.link_builder({
+		url = link_builder({
 			repo = package_name,
 			commit = commit,
 			rel_path = rel_path,
@@ -85,7 +99,7 @@ function ShareGitLink.open_gitfarm_link()
 end
 
 --- Setup ShareGitLink plugin
---- @param opts ShareGitLinkConfig
+--- @param opts ShareGitLinkOptions
 --- @usage
 --- require("sharegitlink").setup({
 ---  link_builder = function(opts) return "https://..." end
@@ -93,8 +107,15 @@ end
 --- })
 function ShareGitLink.setup(opts)
 	if opts then
-		config.link_builder = opts.link_builder or utils.default_link_builder
-		config.display_link = opts.display_link or true
+		if type(opts.link_builder) == "function" then
+			--- @diagnostic disable-next-line: assign-type-mismatch
+			config.link_builder["default"] = opts.link_builder
+		elseif type(opts.link_builder) == "table" then
+			config.link_builder = vim.tbl_extend("force", { default = utils.github_link_builder }, opts.link_builder)
+		end
+		if opts.display_link ~= nil then
+			config.display_link = opts.display_link
+		end
 	end
 end
 

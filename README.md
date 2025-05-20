@@ -67,17 +67,23 @@ return {
   config = function()
     local sharegitlink = require("sharegitlink")
     sharegitlink.setup({
-      link_builder = function(opts)
-        local url = string.format(
-          "https://my.secret.gitfarm.com/packages/%s/blobs/%s/--/%s#L%d-L%d",
-          opts.repo,
-          opts.commit,
-          opts.rel_path,
-          opts.start_line,
-          opts.end_line
-        )
-        return url
-      end,
+      link_builder = {
+        ["my.secret.gitfarm.com"] = function(opts)
+          local file_url = string.format(
+            "https://my.secret.gitfarm.com/packages/%s/blobs/%s/--/%s",
+            opts.repo,
+            opts.commit,
+            opts.rel_path
+          )
+          if opts.end_line ~= nil then
+            if opts.start_line == opts.end_line then
+              return file_url .. string.format("#L%d", opts.start_line)
+            end
+            return file_url .. string.format("#L%d-L%d", opts.start_line, opts.end_line)
+          end
+          return file_url
+        end,
+      }
     })
   end,
 }
